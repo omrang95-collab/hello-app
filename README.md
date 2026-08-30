@@ -1,3 +1,3 @@
-# Hello App
+# عقارات للإيجار - v0.2
 
-A tiny public iPhone-friendly web app that displays **Hello**.
+نسخة تجريبية لعرض العقارات وصورها ومعلومات الإيجار.

@@ -1,31 +1,203 @@
 <!doctype html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#ffffff">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="Hello">
+  <meta name="apple-mobile-web-app-title" content="عقارات للإيجار">
   <link rel="manifest" href="manifest.webmanifest">
-  <title>Hello</title>
+  <title>عقارات للإيجار</title>
   <style>
-    html, body { height: 100%; margin: 0; }
+    * { box-sizing: border-box; }
     body {
-      display: grid;
-      place-items: center;
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
-      background: #fff;
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Tahoma, sans-serif;
+      background: #f5f5f7;
       color: #111;
     }
-    h1 {
-      font-size: clamp(48px, 18vw, 110px);
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: rgba(255,255,255,.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid #e6e6e6;
+      padding: 18px 16px 14px;
+    }
+    header h1 {
       margin: 0;
-      letter-spacing: -0.05em;
+      font-size: 26px;
+    }
+    header p {
+      margin: 5px 0 0;
+      color: #666;
+      font-size: 14px;
+    }
+    main {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+    .property-card {
+      background: white;
+      border-radius: 20px;
+      overflow: hidden;
+      margin-bottom: 18px;
+      box-shadow: 0 4px 20px rgba(0,0,0,.06);
+    }
+    .property-card img {
+      width: 100%;
+      height: 240px;
+      object-fit: cover;
+      display: block;
+      background: #ddd;
+    }
+    .content {
+      padding: 16px;
+    }
+    .topline {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: flex-start;
+    }
+    .title {
+      font-size: 20px;
+      font-weight: 700;
+      margin: 0;
+    }
+    .price {
+      font-size: 18px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .location {
+      color: #666;
+      margin-top: 5px;
+    }
+    .features {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 14px 0;
+    }
+    .tag {
+      background: #f1f1f3;
+      border-radius: 999px;
+      padding: 7px 11px;
+      font-size: 13px;
+    }
+    .description {
+      color: #444;
+      line-height: 1.7;
+      margin: 10px 0 14px;
+    }
+    button {
+      width: 100%;
+      border: 0;
+      border-radius: 13px;
+      padding: 13px 16px;
+      font-size: 16px;
+      font-weight: 700;
+      background: #111;
+      color: white;
+      cursor: pointer;
+    }
+    .details {
+      display: none;
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid #eee;
+      color: #444;
+      line-height: 1.8;
+    }
+    footer {
+      text-align: center;
+      color: #888;
+      padding: 10px 16px 30px;
+      font-size: 13px;
     }
   </style>
 </head>
 <body>
-  <h1>Hello</h1>
+  <header>
+    <h1>عقارات للإيجار</h1>
+    <p>اختر العقار المناسب لك</p>
+  </header>
+
+  <main>
+    <article class="property-card">
+      <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=85" alt="عقار للإيجار">
+      <div class="content">
+        <div class="topline">
+          <div>
+            <h2 class="title">شقة عائلية حديثة</h2>
+            <div class="location">المعبيلة، مسقط</div>
+          </div>
+          <div class="price">300 ر.ع / شهر</div>
+        </div>
+
+        <div class="features">
+          <span class="tag">3 غرف</span>
+          <span class="tag">2 حمام</span>
+          <span class="tag">120 م²</span>
+          <span class="tag">موقف سيارة</span>
+        </div>
+
+        <p class="description">شقة مرتبة ومناسبة للعائلة في موقع هادئ وقريب من الخدمات.</p>
+        <button onclick="toggleDetails(this)">عرض التفاصيل</button>
+        <div class="details">
+          <strong>التفاصيل:</strong><br>
+          الدور: الثاني<br>
+          التأثيث: غير مفروش<br>
+          مدة العقد: سنة<br>
+          الكهرباء والماء: على المستأجر
+        </div>
+      </div>
+    </article>
+
+    <article class="property-card">
+      <img src="https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=1200&q=85" alt="عقار للإيجار">
+      <div class="content">
+        <div class="topline">
+          <div>
+            <h2 class="title">فيلا مستقلة</h2>
+            <div class="location">الخوض، مسقط</div>
+          </div>
+          <div class="price">450 ر.ع / شهر</div>
+        </div>
+
+        <div class="features">
+          <span class="tag">4 غرف</span>
+          <span class="tag">4 حمامات</span>
+          <span class="tag">260 م²</span>
+          <span class="tag">حوش خاص</span>
+        </div>
+
+        <p class="description">فيلا واسعة مناسبة للعائلة مع مساحة خارجية ومواقف خاصة.</p>
+        <button onclick="toggleDetails(this)">عرض التفاصيل</button>
+        <div class="details">
+          <strong>التفاصيل:</strong><br>
+          نوع العقار: فيلا مستقلة<br>
+          التأثيث: غير مفروش<br>
+          مدة العقد: سنة<br>
+          متاح من: الآن
+        </div>
+      </div>
+    </article>
+  </main>
+
+  <footer>جميع العقارات المعروضة متاحة حسب آخر تحديث</footer>
+
+  <script>
+    function toggleDetails(button) {
+      const details = button.nextElementSibling;
+      const open = details.style.display === "block";
+      details.style.display = open ? "none" : "block";
+      button.textContent = open ? "عرض التفاصيل" : "إخفاء التفاصيل";
+    }
+  </script>
 </body>
 </html>

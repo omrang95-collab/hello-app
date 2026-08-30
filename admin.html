@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>إدارة العقارات</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Tahoma,sans-serif;color:#111}
+main{max-width:900px;margin:auto;padding:24px 16px}section{background:#fff;border-radius:18px;padding:18px;margin-bottom:16px}
+h1,h2{margin-top:0}input,textarea,select,button{width:100%;padding:11px 12px;border:1px solid #ddd;border-radius:10px;font-size:15px;margin:5px 0}
+textarea{min-height:90px}button{background:#111;color:#fff;font-weight:700;border:0;cursor:pointer}.secondary{background:#eee;color:#111}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.property{border-top:1px solid #eee;padding:12px 0}.actions{display:flex;gap:8px}.actions button{width:auto}
+.muted{color:#666;font-size:13px}.danger{background:#8b1111}@media(max-width:600px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<main>
+<h1>لوحة إدارة العقارات</h1>
+<p class="muted">هذه الصفحة مخصصة لك. تسجيل الدخول يتم عبر Supabase.</p>
+
+<section id="setupWarning" style="display:none">
+<strong>Supabase غير مربوط بعد.</strong>
+<p>ضع Project URL و anon key في ملف config.js أولاً.</p>
+</section>
+
+<section id="loginBox">
+<h2>تسجيل الدخول</h2>
+<input id="email" type="email" placeholder="البريد الإلكتروني">
+<button id="loginBtn">إرسال رابط تسجيل الدخول</button>
+<div id="loginMsg" class="muted"></div>
+</section>
+
+<div id="adminArea" style="display:none">
+<section>
+<div style="display:flex;justify-content:space-between;gap:10px;align-items:center">
+<h2 style="margin:0">إضافة / تعديل عقار</h2><button id="logoutBtn" class="secondary" style="width:auto">تسجيل خروج</button>
+</div>
+<input id="id" type="hidden">
+<div class="grid">
+<input id="title" placeholder="اسم العقار">
+<input id="location" placeholder="المنطقة">
+<input id="city" placeholder="المدينة" value="مسقط">
+<input id="price" type="number" placeholder="الإيجار الشهري">
+<input id="rooms" type="number" placeholder="عدد الغرف">
+<input id="baths" type="number" placeholder="عدد الحمامات">
+<input id="area" type="number" placeholder="المساحة م²">
+<input id="type" placeholder="نوع العقار: شقة / فيلا">
+<input id="furnished" placeholder="التأثيث">
+<input id="contract" placeholder="مدة العقد">
+<input id="status" placeholder="الحالة" value="متاح الآن">
+<input id="extra" placeholder="ميزة إضافية">
+</div>
+<input id="image_url" placeholder="رابط الصورة">
+<textarea id="description" placeholder="وصف العقار"></textarea>
+<label><input id="published" type="checkbox" checked style="width:auto"> نشر العقار للعامة</label>
+<button id="saveBtn">حفظ العقار</button>
+<button id="cancelBtn" class="secondary" style="display:none">إلغاء التعديل</button>
+<div id="formMsg" class="muted"></div>
+</section>
+
+<section>
+<h2>العقارات الحالية</h2>
+<div id="list"></div>
+</section>
+</div>
+</main>
+
+<script src="config.js"></script>
+<script type="module">
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+const cfg=window.APP_CONFIG||{};
+const configured=cfg.SUPABASE_URL&&!cfg.SUPABASE_URL.includes("YOUR_")&&cfg.SUPABASE_ANON_KEY&&!cfg.SUPABASE_ANON_KEY.includes("YOUR_");
+if(!configured){document.getElementById("setupWarning").style.display="block";document.getElementById("loginBox").style.display="none"}
+const sb=configured?createClient(cfg.SUPABASE_URL,cfg.SUPABASE_ANON_KEY):null;
+const $=id=>document.getElementById(id);
+
+async function refreshSession(){
+  if(!sb)return;
+  const {data:{session}}=await sb.auth.getSession();
+  $("loginBox").style.display=session?"none":"block";
+  $("adminArea").style.display=session?"block":"none";
+  if(session) loadList();
+}
+$("loginBtn").onclick=async()=>{
+  const email=$("email").value.trim(); if(!email)return;
+  const {error}=await sb.auth.signInWithOtp({email,options:{emailRedirectTo:location.href}});
+  $("loginMsg").textContent=error?error.message:"تم إرسال رابط تسجيل الدخول إلى بريدك.";
+};
+$("logoutBtn").onclick=async()=>{await sb.auth.signOut();refreshSession()};
+
+const fields=["title","location","city","price","rooms","baths","area","type","furnished","contract","status","extra","image_url","description","published"];
+function clearForm(){ $("id").value=""; fields.forEach(k=>{ if(k==="published")$(k).checked=true; else $(k).value=k==="city"?"مسقط":k==="status"?"متاح الآن":"" }); $("cancelBtn").style.display="none"; }
+$("cancelBtn").onclick=clearForm;
+
+$("saveBtn").onclick=async()=>{
+  const payload={};
+  fields.forEach(k=>payload[k]=k==="published"?$(k).checked:$(k).value);
+  ["price","rooms","baths","area"].forEach(k=>payload[k]=payload[k]===""?null:Number(payload[k]));
+  const id=$("id").value;
+  let result=id?await sb.from("properties").update(payload).eq("id",id):await sb.from("properties").insert(payload);
+  $("formMsg").textContent=result.error?result.error.message:"تم الحفظ.";
+  if(!result.error){clearForm();loadList()}
+};
+
+async function loadList(){
+  const {data,error}=await sb.from("properties").select("*").order("created_at",{ascending:false});
+  if(error){$("list").textContent=error.message;return}
+  $("list").innerHTML=(data||[]).map(p=>`
+  <div class="property">
+    <strong>${esc(p.title)}</strong> — ${Number(p.price||0)} ر.ع
+    <div class="muted">${esc(p.location)} | ${p.published?"منشور":"مخفي"}</div>
+    <div class="actions">
+      <button data-edit="${p.id}">تعديل</button>
+      <button class="danger" data-del="${p.id}">حذف</button>
+    </div>
+  </div>`).join("")||"<div class='muted'>لا توجد عقارات بعد.</div>";
+  document.querySelectorAll("[data-edit]").forEach(b=>b.onclick=()=>editItem(data.find(p=>String(p.id)===b.dataset.edit)));
+  document.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>deleteItem(b.dataset.del));
+}
+function editItem(p){$("id").value=p.id;fields.forEach(k=>{if(k==="published")$(k).checked=!!p[k];else $(k).value=p[k]??""});$("cancelBtn").style.display="block";scrollTo({top:0,behavior:"smooth"})}
+async function deleteItem(id){if(!confirm("حذف هذا العقار؟"))return;const {error}=await sb.from("properties").delete().eq("id",id);if(error)alert(error.message);else loadList()}
+function esc(v){const d=document.createElement("div");d.textContent=v??"";return d.innerHTML}
+if(sb){sb.auth.onAuthStateChange(()=>refreshSession());refreshSession()}
+</script>
+</body></html>
